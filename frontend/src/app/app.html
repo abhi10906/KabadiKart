@@ -1,0 +1,172 @@
+<!-- ── TOAST MESSAGES ─────────────────────────────────── -->
+<div class="toast toast-error" *ngIf="error">
+  <span>⚠ {{ error }}</span>
+  <button class="toast-close" (click)="dismissError()">✕</button>
+</div>
+<div class="toast toast-success" *ngIf="successMsg">
+  <span>✔ {{ successMsg }}</span>
+</div>
+
+<!-- ── HERO SECTION ───────────────────────────────────── -->
+<div class="hero">
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content">
+
+    <!-- Brand -->
+    <div class="brand">
+      <span class="brand-icon">♻</span>
+      <div>
+        <h1 class="brand-title">ScrapDealer</h1>
+        <p class="brand-sub">Book. Pickup. Recycle.</p>
+      </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="form-card">
+      <h2 class="form-title">
+        {{ editId ? '✏ Edit Booking' : '📋 Schedule a Pickup' }}
+      </h2>
+
+      <form (ngSubmit)="addBooking()" #bookingForm="ngForm" class="booking-form">
+
+        <!-- Row 1: Name + Phone -->
+        <div class="form-row">
+          <div class="input-group">
+            <span class="input-icon">👤</span>
+            <input type="text" placeholder="Your Name" [(ngModel)]="booking.name"
+              name="name" required minlength="3" #nameField="ngModel"/>
+          </div>
+          <div class="input-group">
+            <span class="input-icon">📞</span>
+            <input type="text" placeholder="10-digit Phone" [(ngModel)]="booking.phone"
+              name="phone" required pattern="^\d{10}$" #phoneField="ngModel"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <p class="field-error" *ngIf="nameField.invalid && nameField.touched">
+            Name must be at least 3 characters.
+          </p>
+          <p class="field-error" *ngIf="phoneField.invalid && phoneField.touched">
+            Enter a valid 10-digit phone number.
+          </p>
+        </div>
+
+        <!-- Row 2: Address (full width) -->
+        <div class="form-row">
+          <div class="input-group wide">
+            <span class="input-icon">📍</span>
+            <input type="text" placeholder="Full Pickup Address"
+              [(ngModel)]="booking.address" name="address" required/>
+          </div>
+        </div>
+
+        <!-- Row 3: Scrap Type dropdown + Quantity -->
+        <div class="form-row">
+          <div class="input-group">
+            <span class="input-icon">🔩</span>
+            <select [(ngModel)]="booking.scrapType" name="scrapType" required>
+              <option value="" disabled selected>Select Scrap Type</option>
+              <optgroup *ngFor="let cat of scrapCategories" [label]="cat.label">
+                <option *ngFor="let opt of cat.options" [value]="opt">{{ opt }}</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="input-group">
+            <span class="input-icon">⚖</span>
+            <input type="number" placeholder="Approx. Quantity (kg)"
+              [(ngModel)]="booking.quantity" name="quantity" min="1"/>
+          </div>
+        </div>
+
+        <!-- Row 4: Date + Time Slot -->
+        <div class="form-row">
+          <div class="input-group">
+            <span class="input-icon">📅</span>
+            <input type="date" [(ngModel)]="booking.pickupDate" name="pickupDate"
+              required [min]="minDate" (change)="onDateChange()"/>
+          </div>
+          <div class="input-group" [class.disabled]="!booking.pickupDate">
+            <span class="input-icon">🕐</span>
+            <select [(ngModel)]="booking.timeSlot" name="timeSlot" required
+              [disabled]="!booking.pickupDate">
+              <option value="" disabled selected>
+                {{ booking.pickupDate ? 'Select Time Slot' : 'Pick a date first' }}
+              </option>
+              <option *ngFor="let slot of availableSlots" [value]="slot">{{ slot }}</option>
+              <option *ngIf="booking.pickupDate && availableSlots.length === 0" disabled>
+                No slots available for today
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Row 5: Notes -->
+        <div class="form-row">
+          <div class="input-group wide textarea-group">
+            <span class="input-icon" style="align-self:flex-start;margin-top:12px;">📝</span>
+            <textarea placeholder="Additional notes (optional)..." [(ngModel)]="booking.notes"
+              name="notes" rows="2"></textarea>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" *ngIf="editId" (click)="cancelEdit()">
+            ✕ Cancel
+          </button>
+          <button type="submit" class="btn-submit"
+            [disabled]="bookingForm.invalid || loading || (booking.pickupDate && !booking.timeSlot)">
+            <span *ngIf="!loading">{{ editId ? '💾 Update Booking' : '+ Add Booking' }}</span>
+            <span *ngIf="loading" class="spinner-inline"></span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ── BOOKINGS SECTION ───────────────────────────────── -->
+<div class="bookings-section">
+  <div class="section-header">
+    <h3>All Bookings</h3>
+    <span class="booking-count" *ngIf="bookings.length > 0">
+      {{ bookings.length }} scheduled
+    </span>
+  </div>
+
+  <!-- Loading -->
+  <div class="state-msg" *ngIf="loading && bookings.length === 0">
+    <span class="spinner"></span> Loading bookings...
+  </div>
+
+  <!-- Empty -->
+  <div class="empty-state" *ngIf="!loading && bookings.length === 0">
+    <div class="empty-icon">🗂</div>
+    <p>No bookings yet. Schedule your first pickup above!</p>
+  </div>
+
+  <!-- Cards -->
+  <ul class="bookings-list">
+    <li class="booking-card" *ngFor="let b of bookings"
+      [class.editing]="editId === b._id">
+      <div class="card-left">
+        <div class="card-scrap-badge">{{ b.scrapType }}</div>
+        <strong class="card-name">{{ b.name }}</strong>
+        <p class="card-detail">📍 {{ b.address }}</p>
+        <p class="card-detail">📞 {{ b.phone }}</p>
+        <p class="card-detail" *ngIf="b.pickupDate">
+          📅 {{ b.pickupDate | date:'dd MMM yyyy' }}
+          <span *ngIf="b.timeSlot"> &nbsp;🕐 {{ b.timeSlot }}</span>
+        </p>
+        <p class="card-detail" *ngIf="b.quantity">⚖ {{ b.quantity }} kg</p>
+        <p class="card-note" *ngIf="b.notes">📝 {{ b.notes }}</p>
+      </div>
+      <div class="card-actions">
+        <button class="btn-edit" (click)="editBooking(b)">✏ Edit</button>
+        <button class="btn-delete" (click)="deleteBooking(b._id)">🗑 Delete</button>
+      </div>
+    </li>
+  </ul>
+</div>
