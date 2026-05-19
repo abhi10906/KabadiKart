@@ -5,18 +5,20 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const bookingRoutes = require('./routes/bookingRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
+// ✅ Middleware FIRST — before any routes
 app.use(cors());
 app.use(express.json());
 
-// ✅ connect routes
+// ✅ Routes AFTER middleware
+app.use('/api/auth', authRoutes);
 app.use('/api/bookings', bookingRoutes);
 
-// test route
 app.get('/', (req, res) => {
-  res.send('Scrap App Backend is Running!');
+  res.send('KabadiKart Backend is Running!');
 });
 
 mongoose.connect(process.env.MONGO_URI)
