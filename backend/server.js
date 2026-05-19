@@ -21,9 +21,13 @@ app.get('/', (req, res) => {
   res.send('KabadiKart Backend is Running!');
 });
 
-mongoose.connect(process.env.MONGO_URI)
+  mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('MongoDB Connected');
-    app.listen(5000, () => console.log('Server running on port 5000'));
+
+    app.listen(process.env.PORT || 5000, () => {
+      console.log(`Server running on port ${process.env.PORT || 5000}`);
+    });
+
   })
   .catch((err) => console.log(err));
