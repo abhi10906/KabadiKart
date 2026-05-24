@@ -10,7 +10,11 @@ const authRoutes = require('./routes/authRoutes');
 const app = express();
 
 // ✅ Middleware FIRST — before any routes
-app.use(cors());
+app.use(cors({
+  origin: ['https://kabadi-kart.vercel.app', 'http://localhost:4200'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
 app.use(express.json());
 
 // ✅ Routes AFTER middleware
