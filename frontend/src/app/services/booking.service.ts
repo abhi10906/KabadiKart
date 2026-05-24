@@ -18,7 +18,7 @@ export interface Booking {
 
 @Injectable({ providedIn: 'root' })
 export class BookingService {
-  private api = 'https://kabadikart.onrender.com/api/auth';
+  private api = 'https://kabadikart.onrender.com/api/bookings';
 
   constructor(private http: HttpClient) {}
 
