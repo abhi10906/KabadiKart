@@ -1,0 +1,15 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+@Injectable({ providedIn: 'root' })
+export class AiService {
+  private api = 'https://kabadikart.onrender.com/api/ai';
+  // For local testing use: http://localhost:5000/api/ai
+
+  constructor(private http: HttpClient) {}
+
+  chat(message: string): Observable<{ reply: string }> {
+    return this.http.post<{ reply: string }>(`${this.api}/chat`, { message });
+  }
+}

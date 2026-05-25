@@ -6,8 +6,10 @@ const cors = require('cors');
 
 const bookingRoutes = require('./routes/bookingRoutes');
 const authRoutes = require('./routes/authRoutes');
-
 const app = express();
+
+const aiRoutes = require('./routes/aiRoutes');
+app.use('/api/ai', aiRoutes);
 
 // ✅ Middleware FIRST — before any routes
 app.use(cors({
