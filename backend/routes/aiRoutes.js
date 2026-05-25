@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-const genAI = new GoogleGenerativeAI(process.env.AIzaSyAhtCtPS8-Xv0GbxOTlLIC6-J0QWVUO3Yw);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 router.post('/chat', async (req, res) => {
   try {
