@@ -45,10 +45,6 @@ import { AuthService } from '../../services/auth.service';
             <span *ngIf="loading" class="spinner"></span>
           </button>
         </form>
-
-        <div class="dev-note">
-          <p>💡 <strong>Dev note:</strong> Add your admin credentials to the backend <code>.env</code> file.</p>
-        </div>
       </div>
     </div>
   `,
